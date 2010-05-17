@@ -21,6 +21,7 @@
 
 #define TC_M68HC11
 #define TC_M68HC12
+#define TC_M9S12XG
 
 struct fix;
 
@@ -31,6 +32,10 @@ struct fix;
 
 /* Motorola assembler specs does not require '.' before pseudo-ops.  */
 #define NO_PSEUDO_DOT 1
+
+#define m9s12xg_arch_format m68hc11_arch_format
+#define m9s12xg_arch m68hc11_arch
+#define m9s12xg_listing_header m68hc11_listing_header
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH (m68hc11_arch ())

@@ -2,6 +2,7 @@
    Copyright 1999, 2000, 2001, 2002, 2003, 2006, 2007
    Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
+   XGATE and S12X added by James Murray (jsm@jsm-net.demon.co.uk)
 
    This file is part of the GNU opcodes library.
 
@@ -98,8 +99,8 @@ print_indexed_operand (bfd_vma memaddr, struct disassemble_info* info,
       /* 68HC12 requires an adjustment for movb/movw pc relative modes.  */
       if (reg == PC_REGNUM && info->mach == bfd_mach_m6812 && mov_insn)
         sval += pc_offset;
-      (*info->fprintf_func) (info->stream, "%d,%s",
-			     (int) sval, reg_name[reg]);
+      (*info->fprintf_func) (info->stream, "0x%x,%s",
+			     (unsigned short) sval, reg_name[reg]);
 
       if (reg == PC_REGNUM)
         {
@@ -127,8 +128,8 @@ print_indexed_operand (bfd_vma memaddr, struct disassemble_info* info,
 	  sval = sval + 1;
 	  mode = "+";
 	}
-      (*info->fprintf_func) (info->stream, "%d,%s%s%s",
-			     (int) sval,
+      (*info->fprintf_func) (info->stream, "0x%x,%s%s%s",
+			     (unsigned short) sval,
 			     (buffer[0] & 0x10 ? "" : mode),
 			     reg_name[reg], (buffer[0] & 0x10 ? mode : ""));
     }
@@ -151,7 +152,7 @@ print_indexed_operand (bfd_vma memaddr, struct disassemble_info* info,
 
       pos += 2;
       sval = ((buffer[0] << 8) | (buffer[1] & 0x0FF));
-      (*info->fprintf_func) (info->stream, "[%u,%s]",
+      (*info->fprintf_func) (info->stream, "[0x%x,%s]",
 			     sval & 0x0ffff, reg_name[reg]);
       if (indirect)
         *indirect = 1;
@@ -188,8 +189,8 @@ print_indexed_operand (bfd_vma memaddr, struct disassemble_info* info,
 	  pos++;
           endaddr++;
 	}
-      (*info->fprintf_func) (info->stream, "%d,%s",
-			     (int) sval, reg_name[reg]);
+      (*info->fprintf_func) (info->stream, "0x%x,%s",
+			     (unsigned short) sval, reg_name[reg]);
       if (reg == PC_REGNUM)
         {
           (* info->fprintf_func) (info->stream, " {");
@@ -230,11 +231,89 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 {
   int status;
   bfd_byte buffer[4];
-  unsigned char code;
+  unsigned int code;
   long format, pos, i;
   short sval;
   const struct m68hc11_opcode *opcode;
 
+  if (arch & cpuxgate)
+    {
+    int val;
+  /* Get two bytes as all XGATE instructions are 16bit.  */
+  status = read_memory (memaddr, buffer, 2, info);
+  if (status != 0)
+    {
+      return status;
+    }
+
+  format = 0;
+  code = (buffer[0]<<8) + buffer[1];
+
+  /* Scan the opcode table until we find the opcode
+     with the corresponding page.  */
+  opcode = m68hc11_opcodes;
+  for (i = 0; i < m68hc11_num_opcodes; i++, opcode++)
+    {
+        if ((opcode->opcode != (code & opcode->xg_mask)) || (opcode->arch != cpuxgate)) {
+    	    continue;
+        }
+        /* We have found the opcode.  Extract the operand and print it.  */
+        (*info->fprintf_func) (info->stream, "%s", opcode->name);
+        format = opcode->format;
+        if (format & (M68XG_OP_NONE)) {
+            // ok
+        } else if (format & M68XG_OP_IMM3) {
+    	    (*info->fprintf_func) (info->stream, " #0x%x", (code >> 8) & 0x7 );
+        } else if (format & M68XG_OP_R_R) {
+    	    (*info->fprintf_func) (info->stream, " R%x, R%x", (code >> 8) & 0x7, (code >> 5) & 0x7 );
+        } else if (format & M68XG_OP_R_R_R) {
+    	    (*info->fprintf_func) (info->stream, " R%x, R%x, R%x", (code >> 8) & 0x7, (code >> 5) & 0x7, (code >> 2) & 0x7 );
+        } else if (format & M68XG_OP_RD_RB_RI) {
+    	    (*info->fprintf_func) (info->stream, " R%x, (R%x, R%x)", (code >> 8) & 0x7, (code >> 5) & 0x7, (code >> 2) & 0x7 );
+        } else if (format & M68XG_OP_RD_RB_RIp) {
+    	    (*info->fprintf_func) (info->stream, " R%x, (R%x, R%x+)", (code >> 8) & 0x7, (code >> 5) & 0x7, (code >> 2) & 0x7 );
+        } else if (format & M68XG_OP_RD_RB_mRI) {
+    	    (*info->fprintf_func) (info->stream, " R%x, (R%x, -R%x)", (code >> 8) & 0x7, (code >> 5) & 0x7, (code >> 2) & 0x7 );
+        } else if (format & M68XG_OP_R_R_OFFS5) {
+    	    (*info->fprintf_func) (info->stream, " R%x, (R%x, #0x%x)", (code >> 8) & 0x7, (code >> 5) & 0x7, code & 0x1f );
+        } else if (format & M68XG_OP_R_IMM8) {
+    	    (*info->fprintf_func) (info->stream, " R%x, #0x%02x", (code >> 8) & 0x7, code & 0xff);
+        } else if (format & M68XG_OP_R_IMM4) {
+    	    (*info->fprintf_func) (info->stream, " R%x, #0x%x", (code >> 8) & 0x7, (code & 0xf0)>>4);
+        } else if (format & M68XG_OP_REL9) {
+   	        (*info->fprintf_func) (info->stream, " 0x");
+            val = (buffer[0] & 0x1) ? buffer[1] | 0xFFFFFF00 : buffer[1];
+            (*info->print_address_func) (memaddr + (val<<1) + 2, info);
+
+        } else if (format & M68XG_OP_REL10) {
+   	        (*info->fprintf_func) (info->stream, " 0x");
+            val = (buffer[0]<<8) | (unsigned int)buffer[1];
+            if (val & 0x200) {
+                val |= 0xfffffc00;
+            } else {
+                val &= 0x000001ff;
+            }
+            (*info->print_address_func) (memaddr + (val<<1) +2 , info);
+        } else if ((code & 0x00ff) == 0x00f8) {
+    	    (*info->fprintf_func) (info->stream, " R%x, CCR", (code >> 8) & 0x7);
+        } else if ((code & 0x00ff) == 0x00f9) {
+    	    (*info->fprintf_func) (info->stream, " CCR, R%x", (code >> 8) & 0x7);
+        } else if ((code & 0x00ff) == 0x0) {
+    	    (*info->fprintf_func) (info->stream, " R%x, PC", (code >> 8) & 0x7);
+        } else if (format & M68XG_OP_R) {
+    	    (*info->fprintf_func) (info->stream, " R%x", (code >> 8) & 0x7 );
+	    } else {
+            /* Opcode not recognized.  */
+            (*info->fprintf_func) (info->stream, "Not yet handled .byte\t0x%04x", code);
+        }
+        return 2;
+    }
+   /* Opcode not recognized.  */
+   (*info->fprintf_func) (info->stream, ".byte\t0x%04x", code);
+   return 2; // everything is two bytes
+    }
+    else  /* HC11 and HC12 */
+    {
   /* Get first byte.  Only one at a time because we don't know the
      size of the insn.  */
   status = read_memory (memaddr, buffer, 1, info);
@@ -441,7 +520,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
           pc_dst_offset = 2;
 	  if (format & M6811_OP_IMM8)
 	    {
-	      (*info->fprintf_func) (info->stream, "#%d", (int) buffer[0]);
+	      (*info->fprintf_func) (info->stream, "#0x%x", (int) buffer[0]);
 	      format &= ~M6811_OP_IMM8;
               /* Set PC destination offset.  */
               pc_dst_offset = 1;
@@ -449,17 +528,17 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	  else if (format & M6811_OP_IX)
 	    {
 	      /* Offsets are in range 0..255, print them unsigned.  */
-	      (*info->fprintf_func) (info->stream, "%u,x", buffer[0] & 0x0FF);
+	      (*info->fprintf_func) (info->stream, "0x%x,x", buffer[0] & 0x0FF);
 	      format &= ~M6811_OP_IX;
 	    }
 	  else if (format & M6811_OP_IY)
 	    {
-	      (*info->fprintf_func) (info->stream, "%u,y", buffer[0] & 0x0FF);
+	      (*info->fprintf_func) (info->stream, "0x%x,y", buffer[0] & 0x0FF);
 	      format &= ~M6811_OP_IY;
 	    }
 	  else if (format & M6811_OP_DIRECT)
 	    {
-	      (*info->fprintf_func) (info->stream, "*");
+	      (*info->fprintf_func) (info->stream, "*0x");
 	      (*info->print_address_func) (buffer[0] & 0x0FF, info);
 	      format &= ~M6811_OP_DIRECT;
 	    }
@@ -508,6 +587,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	    sval |= 0xff00;
 
 	  pos += 2;
+   	  (*info->fprintf_func) (info->stream, " 0x");
 	  (*info->print_address_func) (memaddr + pos + sval, info);
 	  format &= ~(M6812_OP_REG | M6811_OP_JUMP_REL);
 	}
@@ -585,12 +665,13 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	  else
 	    format &= ~M6811_OP_IND16;
 
+      (*info->fprintf_func) (info->stream, "0x");
 	  (*info->print_address_func) (addr, info);
           if (format & M6812_OP_PAGE)
             {
               (* info->fprintf_func) (info->stream, " {");
               (* info->print_address_func) (val, info);
-              (* info->fprintf_func) (info->stream, ", %d}", page);
+              (* info->fprintf_func) (info->stream, ", 0x%x}", page);
               format &= ~M6812_OP_PAGE;
               pos += 1;
             }
@@ -622,6 +703,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 
 	  val = ((buffer[0] << 8) | (buffer[1] & 0x0FF));
 	  val &= 0x0FFFF;
+   	  (*info->fprintf_func) (info->stream, " 0x");
 	  (*info->print_address_func) (val, info);
 	}
 
@@ -636,7 +718,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	      return status;
 	    }
 	  pos++;
-	  (*info->fprintf_func) (info->stream, " #$%02x%s",
+	  (*info->fprintf_func) (info->stream, ", #0x%02x%s",
 				 buffer[0] & 0x0FF,
 				 (format & M6811_OP_JUMP_REL ? " " : ""));
 	  format &= ~M6811_OP_BITMASK;
@@ -651,6 +733,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	      return status;
 	    }
 
+      (*info->fprintf_func) (info->stream, " 0x");
 	  pos++;
 	  val = (buffer[0] & 0x80) ? buffer[0] | 0xFFFFFF00 : buffer[0];
 	  (*info->print_address_func) (memaddr + pos + val, info);
@@ -671,6 +754,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	  if (val & 0x8000)
 	    val |= 0xffff0000;
 
+   	  (*info->fprintf_func) (info->stream, " 0x");
 	  (*info->print_address_func) (memaddr + pos + val, info);
 	  format &= ~M6812_OP_JUMP_REL16;
 	}
@@ -687,7 +771,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	  pos += 1;
 
 	  val = buffer[0] & 0x0ff;
-	  (*info->fprintf_func) (info->stream, ", %d", val);
+	  (*info->fprintf_func) (info->stream, ", 0x%x", val);
 	}
       
 #ifdef DEBUG
@@ -710,7 +794,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
   /* Opcode not recognized.  */
   if (format == M6811_OP_PAGE2 && arch & cpu6812
       && ((code >= 0x30 && code <= 0x39) || (code >= 0x40)))
-    (*info->fprintf_func) (info->stream, "trap\t#%d", code & 0x0ff);
+    (*info->fprintf_func) (info->stream, "trap\t#0x%02x", code & 0x0ff);
 
   else if (format == M6811_OP_PAGE2)
     (*info->fprintf_func) (info->stream, ".byte\t0x%02x, 0x%02x",
@@ -725,6 +809,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
     (*info->fprintf_func) (info->stream, ".byte\t0x%02x", code);
 
   return pos;
+  }
 }
 
 /* Disassemble one instruction at address 'memaddr'.  Returns the number
@@ -740,3 +825,18 @@ print_insn_m68hc12 (bfd_vma memaddr, struct disassemble_info* info)
 {
   return print_insn (memaddr, info, cpu6812);
 }
+
+int
+print_insn_m9s12x (bfd_vma memaddr, struct disassemble_info* info)
+{
+  return print_insn (memaddr, info, cpu6812|cpu9s12x);
+}
+
+int
+print_insn_m9s12xg (bfd_vma memaddr, struct disassemble_info* info)
+{
+  return print_insn (memaddr, info, cpuxgate);
+}
+
+
+

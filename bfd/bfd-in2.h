@@ -1907,6 +1907,8 @@ enum bfd_architecture
 #define bfd_mach_m6812_default 0
 #define bfd_mach_m6812         1
 #define bfd_mach_m6812s        2
+  bfd_arch_m9s12x,   /* Freescale 9S12X */
+  bfd_arch_m9s12xg, /* Freescale XGATE */
   bfd_arch_z8k,       /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
@@ -2361,6 +2363,8 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_24_PCREL,
   BFD_RELOC_16_PCREL,
   BFD_RELOC_12_PCREL,
+  BFD_RELOC_10_PCREL,
+  BFD_RELOC_9_PCREL,
   BFD_RELOC_8_PCREL,
 
 /* Section relative relocations.  Some targets need this for DWARF2.  */
@@ -4023,6 +4027,10 @@ this offset in the reloc's section offset.  */
   BFD_RELOC_IA64_DTPREL64MSB,
   BFD_RELOC_IA64_DTPREL64LSB,
   BFD_RELOC_IA64_LTOFF_DTPREL22,
+
+/* Motorola 68HC11 reloc.
+This is the 8 bit high part of a linktime address  */
+  BFD_RELOC_M68HC11_HI8_16,
 
 /* Motorola 68HC11 reloc.
 This is the 8 bit high part of an absolute address.  */

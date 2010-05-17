@@ -86,6 +86,7 @@ i[3-7]86)	 targ_archs=bfd_i386_arch ;;
 i370)		 targ_archs=bfd_i370_arch ;;
 m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch" ;;
 m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch" ;;
+m9s12x*) targ_archs="bfd_m9s12x_arch bfd_m9s12xg_arch bfd_m68hc12_arch bfd_m68hc11_arch" ;;
 m68*)		 targ_archs=bfd_m68k_arch ;;
 m88*)		 targ_archs=bfd_m88k_arch ;;
 maxq*)		 targ_archs=bfd_maxq_arch ;;
@@ -730,6 +731,11 @@ case "${targ}" in
   m68hc12-*-* | m6812-*-*)
     targ_defvec=bfd_elf32_m68hc12_vec
     targ_selvecs="bfd_elf32_m68hc11_vec bfd_elf32_m68hc12_vec"
+    ;;
+
+  m9s12x-*-* | m9s12xg-*-*)
+    targ_defvec=bfd_elf32_m68hc12_vec
+    targ_selvecs="bfd_elf32_m9s12xg_vec bfd_elf32_m68hc11_vec bfd_elf32_m68hc12_vec"
     ;;
 
   m68*-motorola-sysv*)

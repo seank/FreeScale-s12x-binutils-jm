@@ -250,6 +250,7 @@ case $basic_machine in
 	| i370 | i860 | i960 | ia64 \
 	| ip2k | iq2000 \
 	| m32c | m32r | m32rle | m68000 | m68k | m88k \
+        | m9s12x \
 	| maxq | mb | microblaze | mcore | mep \
 	| mips | mipsbe | mipseb | mipsel | mipsle \
 	| mips16 \

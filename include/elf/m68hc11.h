@@ -41,6 +41,7 @@ START_RELOC_NUMBERS (elf_m68hc11_reloc_type)
   RELOC_NUMBER (R_M68HC11_24, 11)
   RELOC_NUMBER (R_M68HC11_LO16, 12)
   RELOC_NUMBER (R_M68HC11_PAGE, 13)
+  RELOC_NUMBER (R_M68HC11_HI8_16, 14)
 
      /* GNU extension for linker relaxation.
         Mark beginning of a jump instruction (any form).  */

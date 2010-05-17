@@ -274,7 +274,22 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 0x00ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  EMPTY_HOWTO (14),
+
+  /* A 8 bit absolute relocation (upper address) */
+  HOWTO (R_M68HC11_HI8_16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */ // was 0
+	 16,			/* bitsize */ // was 8
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */ // was 0
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M68HC11_HI8_16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   EMPTY_HOWTO (15),
   EMPTY_HOWTO (16),
   EMPTY_HOWTO (17),
@@ -340,6 +355,7 @@ static const struct m68hc11_reloc_map m68hc11_reloc_map[] = {
 
   {BFD_RELOC_M68HC11_RL_JUMP, R_M68HC11_RL_JUMP},
   {BFD_RELOC_M68HC11_RL_GROUP, R_M68HC11_RL_GROUP},
+  {BFD_RELOC_M68HC11_HI8_16, R_M68HC11_HI8_16},
 };
 
 static reloc_howto_type *

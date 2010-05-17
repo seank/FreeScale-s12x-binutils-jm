@@ -37,5 +37,6 @@ print_version (const char *name)
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) any later version.\n\
 This program has absolutely no warranty.\n"));
+  printf (_("9S12X patch 20100504\n"));
   exit (0);
 }

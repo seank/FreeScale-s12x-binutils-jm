@@ -67,7 +67,7 @@ CPU_TYPES = \
 	m32c \
 	m32r \
 	m68hc11 \
-	m68k \
+ 	m68k \
 	maxq \
 	mcore \
 	mep \

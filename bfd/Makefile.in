@@ -336,6 +336,8 @@ ALL_MACHINES = \
 	cpu-m32r.lo \
 	cpu-m68hc11.lo \
 	cpu-m68hc12.lo \
+	cpu-m9s12x.lo \
+	cpu-m9s12xg.lo \
 	cpu-m68k.lo \
 	cpu-m88k.lo \
 	cpu-m10200.lo \
@@ -402,6 +404,8 @@ ALL_MACHINES_CFILES = \
 	cpu-m32r.c \
 	cpu-m68hc11.c \
 	cpu-m68hc12.c \
+	cpu-m9s12x.c \
+	cpu-m9s12xg.c \
 	cpu-m68k.c \
 	cpu-m88k.c \
 	cpu-m10200.c \
@@ -517,6 +521,7 @@ BFD32_BACKENDS = \
 	elf32-m68hc11.lo \
 	elf32-m68hc12.lo \
 	elf32-m68hc1x.lo \
+	elf32-m9s12xg.lo \
 	elf32-m68k.lo \
 	elf32-m88k.lo \
 	elf-m10200.lo \
@@ -697,6 +702,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-m68hc11.c \
 	elf32-m68hc12.c \
 	elf32-m68hc1x.c \
+	elf32-m9s12xg.c \
 	elf32-m88k.c \
 	elf-m10200.c \
 	elf-m10300.c \
@@ -1666,6 +1672,10 @@ cpu-m68hc11.lo: cpu-m68hc11.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-m68hc12.lo: cpu-m68hc12.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
+cpu-m9s12x.lo: cpu-m9s12x.c $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
+cpu-m9s12xg.lo: cpu-m9s12xg.c $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
 cpu-m68k.lo: cpu-m68k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/opcode/m68k.h
 cpu-m88k.lo: cpu-m88k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
@@ -2007,6 +2017,11 @@ elf32-m68hc1x.lo: elf32-m68hc1x.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-m68hc1x.h \
   $(INCDIR)/elf/m68hc11.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/opcode/m68hc11.h
+elf32-m9s12xg.lo: elf32-m9s12xg.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-m9s12xg.h \
+  $(INCDIR)/elf/m9s12xg.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/opcode/m9s12xg.h elf32-target.h
 elf32-m88k.lo: elf32-m88k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-target.h

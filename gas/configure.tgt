@@ -50,7 +50,7 @@ case ${cpu} in
   m5200)		cpu_type=m68k ;;
   m68008)		cpu_type=m68k ;;
   m680[012346]0)	cpu_type=m68k ;;
-  m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
+  m6811|m6812|m68hc12|m9s12x|m9s12xg)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
   maxq)			cpu_type=maxq ;;
   mep-*-elf)		cpu_type=mep endian=big ;;
@@ -247,6 +247,8 @@ case ${generic_target} in
 
   m68hc11-*-* | m6811-*-*)		fmt=elf ;;
   m68hc12-*-* | m6812-*-*)		fmt=elf ;;
+  m9s12x-*-*)				fmt=elf ;;
+  m9s12xg-*-*)				fmt=elf ;;
 
   m68k-*-elf*)				fmt=elf ;;
   m68k-*-sysv4*)			fmt=elf em=svr4 ;;

@@ -665,6 +665,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_68HC05:
     case EM_68HC08:
     case EM_68HC11:
+    case EM_M9S12XG:
     case EM_68HC16:
     case EM_FX66:
     case EM_ME16:
@@ -990,6 +991,7 @@ dump_relocations (FILE *file,
 
 	case EM_68HC11:
 	case EM_68HC12:
+	case EM_M9S12XG:
 	  rtype = elf_m68hc11_reloc_type (type);
 	  break;
 
@@ -1724,7 +1726,7 @@ get_machine_name (unsigned e_machine)
     case EM_IA_64:		return "Intel IA-64";
     case EM_MIPS_X:		return "Stanford MIPS-X";
     case EM_COLDFIRE:		return "Motorola Coldfire";
-    case EM_68HC12:		return "Motorola M68HC12";
+
     case EM_ALPHA:		return "Alpha";
     case EM_CYGNUS_D10V:
     case EM_D10V:		return "d10v";
@@ -1755,6 +1757,8 @@ get_machine_name (unsigned e_machine)
     case EM_ST9PLUS:		return "STMicroelectronics ST9+ 8/16 bit microcontroller";
     case EM_ST7:		return "STMicroelectronics ST7 8-bit microcontroller";
     case EM_68HC16:		return "Motorola MC68HC16 Microcontroller";
+    case EM_M9S12XG:		return "Freescale 9S12X-XGATE";
+    case EM_68HC12:		return "Motorola M68HC12";
     case EM_68HC11:		return "Motorola MC68HC11 Microcontroller";
     case EM_68HC08:		return "Motorola MC68HC08 Microcontroller";
     case EM_68HC05:		return "Motorola MC68HC05 Microcontroller";
